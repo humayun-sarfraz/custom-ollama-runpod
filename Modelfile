@@ -1,0 +1,23 @@
+# Modelfile for custom Ollama model
+# This file references a LOCAL GGUF model file only.
+# No model weights are downloaded.
+#
+# The MODEL_PATH environment variable or the default path below
+# must point to a valid GGUF file that YOU have placed on the server.
+
+FROM /workspace/models/custom-model.gguf
+
+# Model parameters
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
+PARAMETER num_ctx 4096
+
+# Stop tokens
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+PARAMETER stop "</s>"
+
+# System prompt
+SYSTEM """You are a helpful, accurate, and concise AI assistant. You answer questions clearly and directly. If you are unsure about something, you say so honestly."""

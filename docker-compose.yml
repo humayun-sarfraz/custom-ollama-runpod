@@ -1,0 +1,37 @@
+# ============================================
+# Custom Ollama on RunPod — Docker Compose
+# ============================================
+# WARNING: No model weights are downloaded.
+# WARNING: You must provide your own GGUF model file.
+# ============================================
+
+services:
+  ollama:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: custom-ollama
+    ports:
+      - "11434:11434"   # Ollama API
+      - "8000:8000"     # FastAPI wrapper
+    volumes:
+      - /workspace/models:/workspace/models  # Mount your model directory
+    environment:
+      - MODEL_NAME=${MODEL_NAME:-custom-assistant}
+      - MODEL_PATH=${MODEL_PATH:-/workspace/models/custom-model.gguf}
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_BASE_URL=http://localhost:11434
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
