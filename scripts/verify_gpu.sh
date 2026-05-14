@@ -29,8 +29,8 @@ if command -v nvcc &>/dev/null; then
 elif [ -d "/usr/local/cuda" ]; then
     echo "  CUDA directory found at /usr/local/cuda"
 elif command -v nvidia-smi &>/dev/null; then
-    CUDA_VER=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)
-    echo "  NVIDIA driver version: $CUDA_VER"
+    DRIVER_VER=$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1)
+    echo "  NVIDIA driver version: $DRIVER_VER"
     echo "  CUDA runtime libraries should be available via the driver."
 else
     echo "WARNING: CUDA runtime not explicitly found, but GPU may still work with Ollama."

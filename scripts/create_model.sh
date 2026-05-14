@@ -82,7 +82,10 @@ echo "  (This may take a moment depending on model size)"
 echo ""
 
 # Create the model — NO pull, NO download
-ollama create "$MODEL_NAME" -f "$TEMP_MODELFILE"
+timeout 600 ollama create "$MODEL_NAME" -f "$TEMP_MODELFILE" || {
+    echo "ERROR: Model creation failed or timed out (10 min limit)."
+    exit 1
+}
 
 echo ""
 echo "============================================"

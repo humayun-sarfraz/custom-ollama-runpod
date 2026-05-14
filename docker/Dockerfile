@@ -13,6 +13,7 @@ ENV OLLAMA_HOST=0.0.0.0:11434
 ENV MODEL_NAME=custom-assistant
 ENV MODEL_PATH=/workspace/models/custom-model.gguf
 ENV OLLAMA_BASE_URL=http://localhost:11434
+ENV API_PORT=8000
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -26,10 +27,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install Ollama runtime ONLY (no models)
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
-# Set up FastAPI wrapper
+# Set up Python virtual environment
 WORKDIR /app
+RUN python3 -m venv /app/venv
 COPY api/requirements.txt /app/requirements.txt
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN /app/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 COPY api/main.py /app/main.py
 COPY Modelfile /app/Modelfile

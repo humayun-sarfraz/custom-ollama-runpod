@@ -18,6 +18,7 @@ fi
 
 # Set defaults
 OLLAMA_HOST="${OLLAMA_HOST:-0.0.0.0:11434}"
+OLLAMA_PORT="${OLLAMA_HOST##*:}"
 export OLLAMA_HOST
 
 # Check if Ollama is installed
@@ -36,13 +37,13 @@ echo "Ollama version: $(ollama --version 2>/dev/null || echo 'unknown')"
 echo ""
 
 # Check if Ollama is already running
-if curl -s "http://localhost:11434/api/tags" &>/dev/null; then
+if curl -s --max-time 2 "http://localhost:${OLLAMA_PORT}/api/tags" &>/dev/null; then
     echo "Ollama is already running."
     echo ""
-    echo "  Local API:  http://localhost:11434"
+    echo "  Local API:  http://localhost:${OLLAMA_PORT}"
     echo "  Bind addr:  $OLLAMA_HOST"
     echo ""
-    echo "To expose on RunPod, add port 11434 in your pod settings."
+    echo "To expose on RunPod, add port ${OLLAMA_PORT} in your pod settings."
     exit 0
 fi
 
@@ -50,27 +51,28 @@ echo "Starting Ollama server..."
 echo "  Binding to: $OLLAMA_HOST"
 echo ""
 
-# Start Ollama in the background
-ollama serve &
+# Start Ollama in the background (nohup to survive terminal close)
+nohup ollama serve > /dev/null 2>&1 &
 OLLAMA_PID=$!
+disown "$OLLAMA_PID"
 
 # Wait for Ollama to be ready
 echo "Waiting for Ollama to start..."
 for i in $(seq 1 30); do
-    if curl -s "http://localhost:11434/api/tags" &>/dev/null; then
+    if curl -s --max-time 2 "http://localhost:${OLLAMA_PORT}/api/tags" &>/dev/null; then
         echo ""
         echo "============================================"
         echo "  Ollama is running!"
         echo "============================================"
         echo ""
-        echo "  Local API:  http://localhost:11434"
+        echo "  Local API:  http://localhost:${OLLAMA_PORT}"
         echo "  Bind addr:  $OLLAMA_HOST"
         echo "  PID:        $OLLAMA_PID"
         echo ""
         echo "  RunPod port exposure:"
-        echo "    Add port 11434 (HTTP) in your RunPod pod settings"
+        echo "    Add port ${OLLAMA_PORT} (HTTP) in your RunPod pod settings"
         echo "    Your API will be available at:"
-        echo "    https://<pod-id>-11434.proxy.runpod.net"
+        echo "    https://<pod-id>-${OLLAMA_PORT}.proxy.runpod.net"
         echo ""
         echo "  To stop: kill $OLLAMA_PID"
         exit 0

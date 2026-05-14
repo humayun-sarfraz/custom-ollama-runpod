@@ -30,7 +30,7 @@ echo ""
 # Check model exists
 echo "[2/4] Checking model '$MODEL_NAME' exists..."
 MODELS=$(curl -s "http://localhost:11434/api/tags")
-if echo "$MODELS" | grep -q "\"$MODEL_NAME\""; then
+if echo "$MODELS" | python3 -c "import sys,json; models=[m['name'].split(':')[0] for m in json.load(sys.stdin).get('models',[])]; sys.exit(0 if '$MODEL_NAME' in models else 1)" 2>/dev/null; then
     echo "  Model '$MODEL_NAME' found."
 else
     echo "  Available models:"
